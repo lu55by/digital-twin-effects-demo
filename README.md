@@ -1,6 +1,6 @@
 # Digital-Twin-Effects-Demo
 
-Download [Node.js](https://nodejs.org/en/download/). Run this followed commands:
+Download [Node.js](https://nodejs.org/en/download/) if neccessary. Then Run this followed commands:
 
 ```sh
 # Install dependencies (only the first time)
