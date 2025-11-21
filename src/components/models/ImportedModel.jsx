@@ -224,7 +224,7 @@ export default function ImportedModel() {
         maxBoxesY.push(box.max.y);
       }
     });
-    var min = 0,
+    let min = 0,
       max = 0;
     for (const m of minBoxesY) {
       min = Math.min(min, m);
