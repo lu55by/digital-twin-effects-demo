@@ -31,4 +31,5 @@ void main() {
     // Scanning Line Effect
     csm_DiffuseColor.rgb = scanning2TopLine(csm_DiffuseColor.rgb, uScanningLineColor, uScanningLineColorIntensity, uMinElevation, 5., .1, uTime, uScanningLineSpeed, uMaxElevation, vPos.y);
 
+    csm_DiffuseColor.rgb = vec3(1., 0., 0.);
 }

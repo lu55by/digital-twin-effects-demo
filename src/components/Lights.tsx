@@ -1,5 +1,12 @@
-/* eslint-disable react/no-unknown-property */
-export default function Lights() {
+/**
+ * Lights Component
+ *
+ * Configures the lighting for the 3D scene.
+ * Includes ambient light and directional lights with shadow casting.
+ *
+ * @returns {JSX.Element} The lighting setup
+ */
+export default function Lights(): JSX.Element {
   return (
     <>
       <ambientLight color="#fff" intensity={0.3} />
@@ -10,11 +17,6 @@ export default function Lights() {
         color="#fff"
         position={[1, 0, 1]}
         intensity={2}
-        // shadow-camera-left={-20}
-        // shadow-camera-right={20}
-        // shadow-camera-top={20}
-        // shadow-camera-bottom={-20}
-        // shadow-camera-near={0.5}
         shadow-camera-far={100}
       />
     </>

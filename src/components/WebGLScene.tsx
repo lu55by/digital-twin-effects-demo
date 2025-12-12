@@ -1,6 +1,11 @@
 import { Canvas } from "@react-three/fiber";
 import Main from "./Main";
 import { Leva } from "leva";
+
+/**
+ * Leva configuration object for theming the control panel.
+ * Defines colors and sizes to match the application design.
+ */
 const levaTheme = {
   sizes: {
     rootWidth: "400px", // Set the desired width here
@@ -22,7 +27,16 @@ const levaTheme = {
     // toolTipText: "red",
   },
 };
-export default function WebGLScene() {
+
+/**
+ * WebGLScene Component
+ *
+ * Sets up the 3D scene using React Three Fiber Canvas.
+ * Configures the camera, shadows, and renders the Main component and Leva controls.
+ *
+ * @returns {JSX.Element} The rendered Canvas and Leva controls
+ */
+export default function WebGLScene(): JSX.Element {
   return (
     <>
       <Leva collapsed theme={levaTheme} />
@@ -32,8 +46,8 @@ export default function WebGLScene() {
         }}
         shadows
         camera={{
-          position: [0, 55.8335377410494 + 20, 126.58513431363215],
-          // position: [0, 0, 9],
+          // position: [0, 55.8335377410494 + 20, 126.58513431363215],
+          position: [0, 0, 9],
         }}
       >
         <Main />

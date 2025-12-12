@@ -8,8 +8,18 @@ import {
 import { useFrame } from "@react-three/fiber";
 import { useControls } from "leva";
 import { useRef } from "react";
+import * as THREE from "three";
 
-export default function HandDecal() {
+/**
+ * HandDecal Component
+ *
+ * Renders a decal with a dynamic text texture on the hand model.
+ * Uses Leva controls for positioning, rotation, scale, and color.
+ * The text animates (slides) using useFrame.
+ *
+ * @returns {JSX.Element} The Decal component
+ */
+export default function HandDecal(): JSX.Element {
   // Decal debug
   // const decalProp = useControls('P2decalProp', {
   const decalProp = useControls(
@@ -49,10 +59,14 @@ export default function HandDecal() {
   );
 
   // const decalRef = useRef()
-  const textRef = useRef();
+  // Explicitly typing the reference to a Text object (from drei) or Object3D
+  const textRef = useRef<THREE.Object3D>(null);
+  
   useFrame((state) => {
     const elapsed = state.clock.elapsedTime;
-    textRef.current.position.x = -Math.tan(elapsed);
+    if (textRef.current) {
+        textRef.current.position.x = -Math.tan(elapsed);
+    }
   });
 
   return (

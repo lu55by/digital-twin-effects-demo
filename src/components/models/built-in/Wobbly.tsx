@@ -15,10 +15,18 @@ import { useFrame } from "@react-three/fiber";
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { folder, useControls } from "leva";
 import { getUniformsColorStr } from "../../../utils/getUniformsColorStr";
-import { useGLTF } from "@react-three/drei";
+// import { useGLTF } from "@react-three/drei";
 
-export default function Wobbly() {
-  const meshRef = useRef(null);
+/**
+ * Wobbly Component
+ * 
+ * Renders an icosahedron with a custom wobble shader.
+ * Uses ThreeCustomShaderMaterial to modify standard materials with custom GLSL code.
+ *
+ * @returns {JSX.Element}
+ */
+export default function Wobbly(): JSX.Element {
+  const meshRef = useRef<THREE.Mesh>(null);
 
   const uniforms = useMemo(() => {
     return {
@@ -38,14 +46,14 @@ export default function Wobbly() {
       inner: {
         value: getUniformsColorStr(uniforms.uInnerCol),
         label: "Inner",
-        onChange: (v) => {
+        onChange: (v: string) => {
           uniforms.uInnerCol.value.set(v);
         },
       },
       outer: {
         value: getUniformsColorStr(uniforms.uOuterCol),
         label: "Outer",
-        onChange: (v) => {
+        onChange: (v: string) => {
           uniforms.uOuterCol.value.set(v);
         },
       },
@@ -68,13 +76,15 @@ export default function Wobbly() {
   }, []);
 
   useEffect(() => {
-    meshRef.current.customDepthMaterial = new VanillaCustomShaderMaterial({
-      silent: true,
-      baseMaterial: THREE.MeshDepthMaterial,
-      vertexShader: wobblyVertex,
-      uniforms,
-      depthPacking: THREE.RGBADepthPacking,
-    });
+    if (meshRef.current) {
+        meshRef.current.customDepthMaterial = new VanillaCustomShaderMaterial({
+        silent: true,
+        baseMaterial: THREE.MeshDepthMaterial,
+        vertexShader: wobblyVertex,
+        uniforms,
+        depthPacking: THREE.RGBADepthPacking,
+        });
+    }
   }, [uniforms]);
 
   useFrame((state) => {

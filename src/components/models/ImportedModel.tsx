@@ -3,7 +3,7 @@
 import { useFrame, useLoader } from "@react-three/fiber";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { folder, useControls } from "leva";
 import { HologramMaterial } from "../shaders/js/HologramMaterial";
@@ -19,7 +19,6 @@ import {
 import CustomShaderMaterial from "three-custom-shader-material/vanilla";
 import customModelVertex from "../shaders/importedModel/vertex.glsl";
 import customModelFragment from "../shaders/importedModel/fragment.glsl";
-import { useGLTF } from "@react-three/drei";
 
 const hologramMaterial = HologramMaterial;
 
@@ -55,16 +54,27 @@ const uniforms = {
 const customStandardMat = new CustomShaderMaterial({
   baseMaterial: THREE.MeshStandardMaterial,
   silent: true,
-  vertexShader: customModelVertex,
-  fragmentShader: customModelFragment,
+  vertexShader: String(customModelVertex),
+  fragmentShader: String(customModelFragment),
   uniforms,
   color: COLOR_CYAN,
   metalness: 0.7,
   roughness: 0.5,
-});
+}) as unknown as THREE.MeshStandardMaterial; // Cast to pretend it's standard for TS access
 
-export default function ImportedModel() {
-  const materials = useLoader(MTLLoader, "models/sci-fi-city/sci-fi-city.mtl");
+/**
+ * ImportedModel Component
+ *
+ * Loads an OBJ map model with MTL materials.
+ * Applies custom shader effects (Hologram or Custom Shader Material) driven by Leva controls.
+ *
+ * @returns {JSX.Element} The model primitive
+ */
+export default function ImportedModel(): JSX.Element {
+  const materials = useLoader(
+    MTLLoader,
+    "models/sci-fi-city/sci-fi-city.mtl"
+  ) as any;
   const obj = useLoader(
     OBJLoader,
     "models/sci-fi-city/sci-fi-city.obj",
@@ -72,13 +82,8 @@ export default function ImportedModel() {
       materials.preload();
       loader.setMaterials(materials);
     }
-    // On Progress
-    // (e) => {
-    //   const progress = e.loaded / e.total;
-    //   console.log(progress);
-    // }
   );
-  console.log(obj);
+  // console.log(obj);
 
   // Debug
   const { isShaderActivated } = useControls(
@@ -91,7 +96,7 @@ export default function ImportedModel() {
       color: {
         value: "#009cff",
         label: "Base Color",
-        onChange: (v) => {
+        onChange: (v: string) => {
           customStandardMat.color.set(v);
           hologramMaterial.uniforms.uColor.value.set(v);
         },
@@ -103,7 +108,7 @@ export default function ImportedModel() {
               THREE.SRGBColorSpace
             )}`,
             label: "Color",
-            onChange: (v) => {
+            onChange: (v: string) => {
               uniforms.uGradientDistColor.value.set(v);
             },
           },
@@ -113,7 +118,7 @@ export default function ImportedModel() {
             max: 20,
             step: 0.01,
             label: "Intensity",
-            onChange: (v) => {
+            onChange: (v: number) => {
               uniforms.uGradientDistColorIntensity.value = v;
             },
           },
@@ -124,7 +129,7 @@ export default function ImportedModel() {
               THREE.SRGBColorSpace
             )}`,
             label: "Color",
-            onChange: (v) => {
+            onChange: (v: string) => {
               uniforms.uScanningCircleColor.value.set(v);
             },
           },
@@ -134,7 +139,7 @@ export default function ImportedModel() {
             max: 20,
             step: 0.01,
             label: "Intensity",
-            onChange: (v) => {
+            onChange: (v: number) => {
               uniforms.uScanningCircleColorIntensity.value = v;
             },
           },
@@ -144,7 +149,7 @@ export default function ImportedModel() {
             max: DEFAULT_SCANNING_CIRCLE_SPEED * 3,
             step: 10,
             label: "Speed",
-            onChange: (v) => {
+            onChange: (v: number) => {
               uniforms.uScanningCircleSpeed.value = v;
             },
           },
@@ -154,7 +159,7 @@ export default function ImportedModel() {
             max: DEFAULT_SCANNING_CIRCLE_WIDTH * 5,
             step: 0.1,
             label: "Width",
-            onChange: (v) => {
+            onChange: (v: number) => {
               uniforms.uScanningCircleWidth.value = v;
             },
           },
@@ -166,7 +171,7 @@ export default function ImportedModel() {
             THREE.SRGBColorSpace
           )}`,
           label: "Color",
-          onChange: (v) => {
+          onChange: (v: string) => {
             uniforms.uScanningLineColor.value.set(v);
           },
         },
@@ -176,7 +181,7 @@ export default function ImportedModel() {
           max: 20,
           step: 0.01,
           label: "Intensity",
-          onChange: (v) => {
+          onChange: (v: number) => {
             uniforms.uScanningLineColorIntensity.value = v;
           },
         },
@@ -186,7 +191,7 @@ export default function ImportedModel() {
           max: DEFAULT_SCANNING_LINE_SPEED * 3,
           step: 10,
           label: "Speed",
-          onChange: (v) => {
+          onChange: (v: number) => {
             uniforms.uScanningLineSpeed.value = v;
           },
         },
@@ -195,7 +200,7 @@ export default function ImportedModel() {
     { order: 1 }
   );
 
-  const objRef = useRef(null);
+  const objRef = useRef<THREE.Group>(null);
   // Model Materials Setting Side Effect
   useEffect(() => {
     // const isGound = (child) =>
@@ -203,28 +208,42 @@ export default function ImportedModel() {
     //   child.name !== "Downtown Center City" &&
     //   child.type !== "Group";
     const material = isShaderActivated ? hologramMaterial : customStandardMat;
-    objRef.current.traverse((child) => {
-      child.material = material;
-      child.castShadow = true;
-      child.receiveShadow = true;
-    });
-    return material.dispose();
+
+    if (objRef.current) {
+      objRef.current.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.material = material;
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+    }
+
+    // Warning: Don't dispose material here as it is shared
+    // return () => material.dispose();
   }, [obj, isShaderActivated]);
 
   // Min & Max Elevation Side Effect
   useEffect(() => {
-    const minBoxesY = [];
-    const maxBoxesY = [];
-    objRef.current.traverse((child) => {
-      if (child.isMesh) {
-        child.geometry.computeBoundingBox();
-        const box = child.geometry.boundingBox;
-        // console.log(child.geometry.boundingBox);
-        minBoxesY.push(box.min.y);
-        maxBoxesY.push(box.max.y);
-      }
-    });
-    var min = 0,
+    const minBoxesY: number[] = [];
+    const maxBoxesY: number[] = [];
+    if (objRef.current) {
+      objRef.current.traverse((child) => {
+        if (
+          child instanceof THREE.Mesh &&
+          child.geometry instanceof THREE.BufferGeometry
+        ) {
+          child.geometry.computeBoundingBox();
+          const box = child.geometry.boundingBox;
+          // console.log(child.geometry.boundingBox);
+          if (box) {
+            minBoxesY.push(box.min.y);
+            maxBoxesY.push(box.max.y);
+          }
+        }
+      });
+    }
+    let min = 0,
       max = 0;
     for (const m of minBoxesY) {
       min = Math.min(min, m);
@@ -234,24 +253,22 @@ export default function ImportedModel() {
     }
     // console.log("Min Y -> \n", min);
     // console.log("Max Y -> \n", max); // 351.8070068359375
-    customStandardMat.uniforms.uMinElevation.value = min;
-    customStandardMat.uniforms.uMaxElevation.value = max;
+    (customStandardMat as any).uniforms.uMinElevation.value = min;
+    (customStandardMat as any).uniforms.uMaxElevation.value = max;
   }, []);
 
   useFrame((state) => {
     const elapsed = state.clock.elapsedTime;
     hologramMaterial.uniforms.uTime.value = elapsed;
-    customStandardMat.uniforms.uTime.value = elapsed;
+    (customStandardMat as any).uniforms.uTime.value = elapsed;
   });
 
   return (
-    <primitive object={obj} scale={0.4} position={[60, 0, 10]} ref={objRef} />
-    // <primitive
-    //   object={nodes.Scene}
-    //   scale={5}
-    //   position={[60, 0, 10]}
-    //   ref={objRef}
-    // />
+    <primitive
+      object={obj as any}
+      scale={0.4}
+      position={[60, 0, 10]}
+      ref={objRef}
+    />
   );
-  // return <TestBox />;
 }

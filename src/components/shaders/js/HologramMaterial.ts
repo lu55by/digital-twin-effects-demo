@@ -3,8 +3,8 @@ import hologramFragment from "../hologram/fragment.glsl";
 import * as THREE from "three";
 
 export const HologramMaterial = new THREE.ShaderMaterial({
-  vertexShader: hologramVertex,
-  fragmentShader: hologramFragment,
+  vertexShader: String(hologramVertex),
+  fragmentShader: String(hologramFragment),
   uniforms: {
     uTime: new THREE.Uniform(0),
     uColor: new THREE.Uniform(new THREE.Color("#009cff")),

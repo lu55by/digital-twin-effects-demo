@@ -41,10 +41,25 @@ const ShaderMaterial = new THREE.ShaderMaterial({
   side: THREE.DoubleSide,
 });
 
-export default function TestBox(color) {
-  const textBoxRef = useRef(null);
+interface TestBoxProps {
+    color?: string;
+}
+
+/**
+ * TestBox Component
+ * 
+ * A simple test component rendering a sphere with a custom raw ShaderMaterial.
+ * Demonstrates basic hologram/stripe effect.
+ * 
+ * @param props - Component props
+ * @returns {JSX.Element}
+ */
+export default function TestBox(props: TestBoxProps): JSX.Element {
+  const textBoxRef = useRef<THREE.Mesh>(null);
   useEffect(() => {
-    textBoxRef.current.material = ShaderMaterial;
+    if (textBoxRef.current) {
+        textBoxRef.current.material = ShaderMaterial;
+    }
   }, [textBoxRef]);
   return (
     <mesh ref={textBoxRef}>
