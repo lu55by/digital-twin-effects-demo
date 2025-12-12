@@ -225,6 +225,7 @@ export default function ImportedModel(): JSX.Element {
 
   // Min & Max Elevation Side Effect
   useEffect(() => {
+<<<<<<< HEAD:src/components/models/ImportedModel.tsx
     const minBoxesY: number[] = [];
     const maxBoxesY: number[] = [];
     if (objRef.current) {
@@ -243,6 +244,19 @@ export default function ImportedModel(): JSX.Element {
         }
       });
     }
+=======
+    const minBoxesY = [];
+    const maxBoxesY = [];
+    objRef.current.traverse((child) => {
+      if (child.isMesh) {
+        child.geometry.computeBoundingBox();
+        const box = child.geometry.boundingBox;
+        // console.log(child.geometry.boundingBox);
+        minBoxesY.push(box.min.y);
+        maxBoxesY.push(box.max.y);
+      }
+    });
+>>>>>>> 77106561141e35597d940a621d400f97b4211ebc:src/components/models/ImportedModel.jsx
     let min = 0,
       max = 0;
     for (const m of minBoxesY) {
