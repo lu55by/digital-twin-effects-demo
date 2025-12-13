@@ -51,6 +51,7 @@ const uniforms = {
   uScanningCircleWidth: new THREE.Uniform(DEFAULT_SCANNING_CIRCLE_WIDTH),
 };
 
+// TODO: Fix the issue of not being able to apply the CustomShaderMaterial to the model
 const customStandardMat = new CustomShaderMaterial({
   baseMaterial: THREE.MeshStandardMaterial,
   silent: true,
@@ -61,6 +62,7 @@ const customStandardMat = new CustomShaderMaterial({
   metalness: 0.7,
   roughness: 0.5,
 }) as unknown as THREE.MeshStandardMaterial; // Cast to pretend it's standard for TS access
+console.log("\n -- customStandardMat ->", customStandardMat);
 
 /**
  * ImportedModel Component
@@ -213,10 +215,12 @@ export default function ImportedModel(): JSX.Element {
       objRef.current.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           child.material = material;
-          child.castShadow = true;
-          child.receiveShadow = true;
+          //   child.castShadow = true;
+          //   child.receiveShadow = true;
         }
       });
+      // Log the objRef.current
+      console.log("objRef.current ->", objRef.current);
     }
 
     // Warning: Don't dispose material here as it is shared
@@ -225,7 +229,6 @@ export default function ImportedModel(): JSX.Element {
 
   // Min & Max Elevation Side Effect
   useEffect(() => {
-<<<<<<< HEAD:src/components/models/ImportedModel.tsx
     const minBoxesY: number[] = [];
     const maxBoxesY: number[] = [];
     if (objRef.current) {
@@ -244,19 +247,6 @@ export default function ImportedModel(): JSX.Element {
         }
       });
     }
-=======
-    const minBoxesY = [];
-    const maxBoxesY = [];
-    objRef.current.traverse((child) => {
-      if (child.isMesh) {
-        child.geometry.computeBoundingBox();
-        const box = child.geometry.boundingBox;
-        // console.log(child.geometry.boundingBox);
-        minBoxesY.push(box.min.y);
-        maxBoxesY.push(box.max.y);
-      }
-    });
->>>>>>> 77106561141e35597d940a621d400f97b4211ebc:src/components/models/ImportedModel.jsx
     let min = 0,
       max = 0;
     for (const m of minBoxesY) {
