@@ -30,6 +30,4 @@ void main() {
     csm_DiffuseColor.rgb = scanningCircle(csm_DiffuseColor.rgb, uScanningCircleColor, uScanningCircleColorIntensity, vec2(-160., -200), vPos.xz, uScanningCircleWidth, .001, 600., uTime, uScanningCircleSpeed);
     // Scanning Line Effect
     csm_DiffuseColor.rgb = scanning2TopLine(csm_DiffuseColor.rgb, uScanningLineColor, uScanningLineColorIntensity, uMinElevation, 5., .1, uTime, uScanningLineSpeed, uMaxElevation, vPos.y);
-
-    csm_DiffuseColor.rgb = vec3(1., 0., 0.);
 }

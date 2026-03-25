@@ -34,13 +34,13 @@ const uniforms = {
 
   // Intensities
   uGradientDistColorIntensity: new THREE.Uniform(
-    DEFAULT_GRADIENT_COLOR_INTENSITY
+    DEFAULT_GRADIENT_COLOR_INTENSITY,
   ),
   uScanningCircleColorIntensity: new THREE.Uniform(
-    DEFAULT_SCANNING_CIRCLE_INTENSITY
+    DEFAULT_SCANNING_CIRCLE_INTENSITY,
   ),
   uScanningLineColorIntensity: new THREE.Uniform(
-    DEFAULT_SCANNING_LINE_INTENSITY
+    DEFAULT_SCANNING_LINE_INTENSITY,
   ),
 
   // Speeds
@@ -75,7 +75,7 @@ console.log("\n -- customStandardMat ->", customStandardMat);
 export default function ImportedModel(): JSX.Element {
   const materials = useLoader(
     MTLLoader,
-    "models/sci-fi-city/sci-fi-city.mtl"
+    "models/sci-fi-city/sci-fi-city.mtl",
   ) as any;
   const obj = useLoader(
     OBJLoader,
@@ -83,8 +83,8 @@ export default function ImportedModel(): JSX.Element {
     (loader) => {
       materials.preload();
       loader.setMaterials(materials);
-    }
-  );
+    },
+  ) as THREE.Group;
   // console.log(obj);
 
   // Debug
@@ -107,7 +107,7 @@ export default function ImportedModel(): JSX.Element {
         Gradient: folder({
           gradientDistColor: {
             value: `#${uniforms.uGradientDistColor.value.getHexString(
-              THREE.SRGBColorSpace
+              THREE.SRGBColorSpace,
             )}`,
             label: "Color",
             onChange: (v: string) => {
@@ -128,7 +128,7 @@ export default function ImportedModel(): JSX.Element {
         "Scanning Circle": folder({
           scanningCircleColor: {
             value: `#${uniforms.uScanningCircleColor.value.getHexString(
-              THREE.SRGBColorSpace
+              THREE.SRGBColorSpace,
             )}`,
             label: "Color",
             onChange: (v: string) => {
@@ -170,7 +170,7 @@ export default function ImportedModel(): JSX.Element {
       "Scanning Line": folder({
         scanningLineColor: {
           value: `#${uniforms.uScanningLineColor.value.getHexString(
-            THREE.SRGBColorSpace
+            THREE.SRGBColorSpace,
           )}`,
           label: "Color",
           onChange: (v: string) => {
@@ -199,7 +199,7 @@ export default function ImportedModel(): JSX.Element {
         },
       }),
     },
-    { order: 1 }
+    { order: 1 },
   );
 
   const objRef = useRef<THREE.Group>(null);
@@ -229,37 +229,30 @@ export default function ImportedModel(): JSX.Element {
 
   // Min & Max Elevation Side Effect
   useEffect(() => {
-    const minBoxesY: number[] = [];
-    const maxBoxesY: number[] = [];
-    if (objRef.current) {
-      objRef.current.traverse((child) => {
-        if (
-          child instanceof THREE.Mesh &&
-          child.geometry instanceof THREE.BufferGeometry
-        ) {
-          child.geometry.computeBoundingBox();
-          const box = child.geometry.boundingBox;
-          // console.log(child.geometry.boundingBox);
-          if (box) {
-            minBoxesY.push(box.min.y);
-            maxBoxesY.push(box.max.y);
-          }
-        }
-      });
+    if (obj) {
+      // Calculate the bounding box in the model's local coordinate space.
+      // We temporarily set scale to 1 to ensure box.min/max match the raw geometry attributes (vPos).
+      const savedScale = obj.scale.clone();
+      obj.scale.setScalar(1);
+      obj.updateMatrixWorld(true);
+
+      const box = new THREE.Box3().setFromObject(obj);
+
+      // Restore the visual scale
+      obj.scale.copy(savedScale);
+      obj.updateMatrixWorld(true);
+
+      uniforms.uMinElevation.value = box.min.y;
+      uniforms.uMaxElevation.value = box.max.y;
+
+      console.log(
+        "\n -- ImportedModel -- Computed Bounding Box (Local Units) ->",
+        box,
+      );
+      console.log("Min Y ->", box.min.y);
+      console.log("Max Y ->", box.max.y);
     }
-    let min = 0,
-      max = 0;
-    for (const m of minBoxesY) {
-      min = Math.min(min, m);
-    }
-    for (const m of maxBoxesY) {
-      max = Math.max(max, m);
-    }
-    // console.log("Min Y -> \n", min);
-    // console.log("Max Y -> \n", max); // 351.8070068359375
-    (customStandardMat as any).uniforms.uMinElevation.value = min;
-    (customStandardMat as any).uniforms.uMaxElevation.value = max;
-  }, []);
+  }, [obj]);
 
   useFrame((state) => {
     const elapsed = state.clock.elapsedTime;

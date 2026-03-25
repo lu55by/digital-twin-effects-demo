@@ -47,7 +47,8 @@ export default function WebGLScene(): JSX.Element {
         shadows
         camera={{
           // position: [0, 55.8335377410494 + 20, 126.58513431363215],
-          position: [0, 0, 9],
+          position: [100, 206, 127],
+          // position: [0, 0, 9],
         }}
       >
         <Main />
